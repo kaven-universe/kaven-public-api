@@ -4,10 +4,10 @@
  * @website:     http://api.kaven.xyz
  * @file:        [Kaven-Public-API] /server.js
  * @create:      2022-06-27 14:30:57.698
- * @modify:      2022-06-27 14:40:41.336
+ * @modify:      2022-06-27 14:45:31.989
  * @version:     0.0.2
- * @times:       6
- * @lines:       45
+ * @times:       7
+ * @lines:       46
  * @copyright:   Copyright © 2022 Kaven. All Rights Reserved.
  * @description: [description]
  * @license:     [license]
@@ -23,6 +23,7 @@ const app = fastify({
 
 // Declare a route
 app.get("/", async (request, reply) => {
+    console.info(`${new Date()} ${request.ip}`);
     return request.ip;
 });
 
