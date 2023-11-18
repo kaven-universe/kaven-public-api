@@ -8,10 +8,10 @@
   },
   "license": "MIT",
   "dependencies": {
-    "fastify": "^4.1.0"
+    "fastify": "^4.24.3"
   },
   "devDependencies": {
-    "@wenkai.wu/eslint-config": "^1.0.6",
-    "eslint": "^8.18.0"
+    "@wenkai.wu/eslint-config": "^1.0.7",
+    "eslint": "^8.54.0"
   }
 }
