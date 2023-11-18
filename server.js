@@ -2,45 +2,50 @@
  * @author:      Kaven
  * @email:       kaven@wuwenkai.com
  * @website:     http://api.kaven.xyz
- * @file:        [Kaven-Public-API] /server.js
+ * @file:        [kaven-public-api] /server.js
  * @create:      2022-06-27 14:30:57.698
- * @modify:      2022-06-27 14:45:31.989
+ * @modify:      2023-11-18 20:57:51.062
  * @version:     0.0.2
- * @times:       7
- * @lines:       46
- * @copyright:   Copyright © 2022 Kaven. All Rights Reserved.
+ * @times:       16
+ * @lines:       52
+ * @copyright:   Copyright © 2022-2023 Kaven. All Rights Reserved.
  * @description: [description]
  * @license:     [license]
  ********************************************************************/
 
 
-// Require the framework and instantiate it
-const { fastify } = require("fastify");
+import { fastify } from "fastify";
+import { FormatCurrentDate } from "kaven-basic";
+import { LoadJsonConfig } from "kaven-utils";
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const config = await LoadJsonConfig(__dirname, "./config.json");
 
 const app = fastify({
     trustProxy: true,
 });
 
-// Declare a route
 app.get("/", async (request, reply) => {
-    console.info(`${new Date()} ${request.ip}`);
+    console.info(`[${FormatCurrentDate()}] ${request.ip}`);
     return request.ip;
 });
 
-// Run the server!
-const start = async () => {
+app.get("*", (request, reply) => {
+    reply.code(400).send("Bad Request");
+});
 
-    const host = "0.0.0.0";
-    const port = 3000;
+try {
+    const host = config.host;
+    const port = config.port;
 
-    try {
-        await app.listen({host, port});
+    await app.listen({ host, port });
 
-        console.info(`server listening on http://localhost:${port}`);
-    } catch (err) {
-        console.error(err);
-        process.exit(1);
-    }
-};
-
-start();
+    console.info(`server listening on http://${host}:${port}`);
+} catch (err) {
+    console.error(err);
+    process.exit(1);
+}

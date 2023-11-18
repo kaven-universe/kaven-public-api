@@ -3,12 +3,15 @@
   "version": "0.0.1",
   "description": "Kaven Public API",
   "main": "server.js",
+  "type": "module",
   "scripts": {
     "start": "node server.js"
   },
   "license": "MIT",
   "dependencies": {
-    "fastify": "^4.24.3"
+    "fastify": "^4.24.3",
+    "kaven-basic": "^4.2.5",
+    "kaven-utils": "^5.0.1"
   },
   "devDependencies": {
     "@wenkai.wu/eslint-config": "^1.0.7",
