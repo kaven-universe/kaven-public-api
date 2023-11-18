@@ -4,9 +4,9 @@
  * @website:     http://api.kaven.xyz
  * @file:        [kaven-public-api] /server.js
  * @create:      2022-06-27 14:30:57.698
- * @modify:      2023-11-18 20:57:51.062
+ * @modify:      2023-11-18 21:13:36.582
  * @version:     0.0.2
- * @times:       16
+ * @times:       17
  * @lines:       52
  * @copyright:   Copyright © 2022-2023 Kaven. All Rights Reserved.
  * @description: [description]
@@ -23,7 +23,7 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const config = await LoadJsonConfig(__dirname, "./config.json");
+const config = await LoadJsonConfig(__dirname);
 
 const app = fastify({
     trustProxy: true,
