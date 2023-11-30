@@ -14,9 +14,9 @@
  ********************************************************************/
 
 
-import { fastify } from "fastify";
 import { FormatCurrentDate } from "kaven-basic";
-import { LoadJsonConfig } from "kaven-utils";
+import { LoadJsonConfig, HttpRequestParser } from "kaven-utils";
+import { createServer } from "net";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 
@@ -25,27 +25,36 @@ const __dirname = dirname(__filename);
 
 const config = await LoadJsonConfig(__dirname);
 
-const app = fastify({
-    trustProxy: true,
+const server = createServer(socket => {
+    console.log("Client connected");
+
+    const parser = new HttpRequestParser();
+
+    // Handle data received from the client
+    socket.on("data", (data) => {
+        console.log(`Received data: ${data}`);
+                
+        parser.Add(data);
+        const message = parser.TryGet();
+        if (message) {
+            console.info(message);
+        }
+    });
+
+    // Handle client disconnection
+    socket.on("end", () => {
+        console.log("Client disconnected");
+    });
+
+    // Handle errors
+    socket.on("error", (err) => {
+        console.error(`Error: ${err.message}`);
+    });
 });
 
-app.get("/", async (request, reply) => {
-    console.info(`[${FormatCurrentDate()}] ${request.ip}`);
-    return request.ip;
-});
+const host = config.host;
+const port = config.port;
 
-app.get("*", (request, reply) => {
-    reply.code(400).send("Bad Request");
-});
-
-try {
-    const host = config.host;
-    const port = config.port;
-
-    await app.listen({ host, port });
-
+server.listen(port, host, () => {
     console.info(`server listening on http://${host}:${port}`);
-} catch (err) {
-    console.error(err);
-    process.exit(1);
-}
+});
