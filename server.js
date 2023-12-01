@@ -4,17 +4,17 @@
  * @website:     http://api.kaven.xyz
  * @file:        [kaven-public-api] /server.js
  * @create:      2022-06-27 14:30:57.698
- * @modify:      2023-12-01 15:28:53.205
+ * @modify:      2023-12-01 16:27:17.551
  * @version:     0.0.2
- * @times:       19
- * @lines:       89
+ * @times:       20
+ * @lines:       82
  * @copyright:   Copyright © 2022-2023 Kaven. All Rights Reserved.
  * @description: [description]
  * @license:     [license]
  ********************************************************************/
 
 
-import { FileSize, HttpRequestHeader_XForwardedFor, IsEqual, IsPublicIP } from "kaven-basic";
+import { FileSize, HttpRequestHeader_XForwardedFor, IsEqual, IsPrivateIP, IsPublicIP } from "kaven-basic";
 import { HttpRequestParser, HttpResponseBody, HttpResponseMessage, HttpResponseStatusLine, KavenLogger, LoadJsonConfig } from "kaven-utils";
 import { createServer } from "net";
 import { dirname } from "path";
@@ -35,30 +35,23 @@ const server = createServer(socket => {
         parser.Add(data);
         const request = parser.TryGet();
         if (request) {
-            let ip = socket.remoteAddress;
+            const ips = [socket.remoteAddress];
 
-            if (!IsPublicIP(ip)) {
-                const header = request.Headers.find(p => IsEqual(p.Name, "X-Real-IP", true));
-                if (header) {
-                    if (IsPublicIP(header.Value)) {
-                        ip = header.Value;
-                    }
-                }
+            let header = request.Headers.find(p => IsEqual(p.Name, "X-Real-IP", true));
+            if (header) {
+                ips.push(header.Value);
             }
 
-            if (!IsPublicIP(ip)) {
-                const header = request.Headers.find(p => IsEqual(p.Name, HttpRequestHeader_XForwardedFor, true));
-                if (header) {
-                    const first = header.Value.split(",")[0];
-                    if (IsPublicIP(first)) {
-                        ip = first;
-                    }
-                }
+            header = request.Headers.find(p => IsEqual(p.Name, HttpRequestHeader_XForwardedFor, true));
+            if (header) {
+                ips.push(header.Value.split(",")[0]);
             }
+
+            const ip = ips.find(IsPublicIP) ?? ips.find(IsPrivateIP) ?? ips.find(p => !!p) ?? "";
 
             const response = new HttpResponseMessage();
             response.StatusLine = new HttpResponseStatusLine(200);
-            response.Body = new HttpResponseBody(Buffer.from(ip ?? ""));
+            response.Body = new HttpResponseBody(Buffer.from(ip));
 
             socket.end(response.ToBuffer());
 
