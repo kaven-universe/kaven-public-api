@@ -4,17 +4,17 @@
  * @website:     http://api.kaven.xyz
  * @file:        [kaven-public-api] /server.js
  * @create:      2022-06-27 14:30:57.698
- * @modify:      2023-11-18 21:13:36.582
+ * @modify:      2023-12-01 15:28:53.205
  * @version:     0.0.2
- * @times:       17
- * @lines:       52
+ * @times:       19
+ * @lines:       89
  * @copyright:   Copyright © 2022-2023 Kaven. All Rights Reserved.
  * @description: [description]
  * @license:     [license]
  ********************************************************************/
 
 
-import { FileSize } from "kaven-basic";
+import { FileSize, HttpRequestHeader_XForwardedFor, IsEqual, IsPublicIP } from "kaven-basic";
 import { HttpRequestParser, HttpResponseBody, HttpResponseMessage, HttpResponseStatusLine, KavenLogger, LoadJsonConfig } from "kaven-utils";
 import { createServer } from "net";
 import { dirname } from "path";
@@ -35,21 +35,43 @@ const server = createServer(socket => {
         parser.Add(data);
         const request = parser.TryGet();
         if (request) {
+            let ip = socket.remoteAddress;
+
+            if (!IsPublicIP(ip)) {
+                const header = request.Headers.find(p => IsEqual(p.Name, "X-Real-IP", true));
+                if (header) {
+                    if (IsPublicIP(header.Value)) {
+                        ip = header.Value;
+                    }
+                }
+            }
+
+            if (!IsPublicIP(ip)) {
+                const header = request.Headers.find(p => IsEqual(p.Name, HttpRequestHeader_XForwardedFor, true));
+                if (header) {
+                    const first = header.Value.split(",")[0];
+                    if (IsPublicIP(first)) {
+                        ip = first;
+                    }
+                }
+            }
+
             const response = new HttpResponseMessage();
             response.StatusLine = new HttpResponseStatusLine(200);
-            response.Body = new HttpResponseBody(Buffer.from(socket.remoteAddress ?? ""));
+            response.Body = new HttpResponseBody(Buffer.from(ip ?? ""));
 
             socket.end(response.ToBuffer());
 
             logs.push(...[
                 `${request.StartLine.Method} ${request.StartLine.RequestTarget.OriginalUrl}`,
+                `ip:${ip}`,
             ]);
         }
     });
 
     // Handle client disconnection
     socket.on("end", () => {
-        KavenLogger.Default.Info(`${logs.join(", ")}, ip: ${socket.remoteAddress}, read: ${FileSize(socket.bytesRead)}, write: ${FileSize(socket.bytesWritten)}`);
+        KavenLogger.Default.Info(` ${logs.join(", ")}, read:${FileSize(socket.bytesRead)},write: ${FileSize(socket.bytesWritten)}`);
     });
 
     // Handle errors

@@ -1,5 +1,6 @@
 {
     "Kaven.generateFileHeader.website": "http://api.kaven.xyz",
+    "Kaven.generateFileHeader.autoGenerateWhenSave": true,
     "cSpell.words": [
         "Kaven",
         "fastify",
