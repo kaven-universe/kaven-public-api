@@ -15,7 +15,7 @@
 
 
 import { FormatCurrentDate } from "kaven-basic";
-import { LoadJsonConfig, HttpRequestParser } from "kaven-utils";
+import { LoadJsonConfig, HttpRequestParser, HttpResponseMessage, HttpResponseStatusLine, HttpResponseBody } from "kaven-utils";
 import { createServer } from "net";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
@@ -31,13 +31,17 @@ const server = createServer(socket => {
     const parser = new HttpRequestParser();
 
     // Handle data received from the client
-    socket.on("data", (data) => {
-        console.log(`Received data: ${data}`);
-                
+    socket.on("data", (data) => {   
         parser.Add(data);
-        const message = parser.TryGet();
-        if (message) {
-            console.info(message);
+        const request = parser.TryGet();
+        if (request) {
+            console.info(request);
+            
+            const response = new HttpResponseMessage();
+            response.StatusLine = new HttpResponseStatusLine(200);
+            response.Body = new HttpResponseBody(Buffer.from(socket.remoteAddress ?? ""));
+
+            socket.end(response.ToBuffer());
         }
     });
 
