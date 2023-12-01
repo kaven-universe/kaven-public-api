@@ -6,11 +6,11 @@ settings:
 
 dependencies:
   kaven-basic:
-    specifier: ^4.3.1
-    version: 4.3.1
+    specifier: ^4.3.2
+    version: 4.3.2
   kaven-utils:
-    specifier: ^5.1.1
-    version: 5.1.1
+    specifier: ^5.1.2
+    version: 5.1.2
 
 devDependencies:
   '@wenkai.wu/eslint-config':
@@ -815,12 +815,12 @@ packages:
       safe-buffer: 5.2.1
     dev: false
 
-  /kaven-basic@4.3.1:
-    resolution: {integrity: sha512-7jcuQwzEAe9ePksbC/rBK9g9LJDQSH8akj4PA2AOKdWyple2j3QnBitpo1ZL3CNCqZQi67hn30WT4LM9fTp5+A==}
+  /kaven-basic@4.3.2:
+    resolution: {integrity: sha512-wW7QTePd9QESlpHnVYfF7rcH748QQU7WTmswxpLgjPva6WyBLmgl9sLTgCYGtwaJHSnGp+tbvkwwnVFJWczgGw==}
     dev: false
 
-  /kaven-utils@5.1.1:
-    resolution: {integrity: sha512-apNEOOCn1nDIHkh7V9qviGtglu/XOXJ87rAKdyGkA2RX5q8qv87JMtNlcWKIEIW1rzwHErbZ/IKPELHS1tVaIA==}
+  /kaven-utils@5.1.2:
+    resolution: {integrity: sha512-3x/Qp+s0w5b8Hd8n56SX2lov42MQvAX5RJ7suXkgd6sGH0zBHHaN1SxHla21VSZJSOdO1br9WEo++mlD+7ECDg==}
     hasBin: true
     dependencies:
       ansi_up: 5.2.1
@@ -832,7 +832,7 @@ packages:
       ftp: 0.3.10
       iconv-lite: 0.6.3
       jsonwebtoken: 9.0.2
-      kaven-basic: 4.3.1
+      kaven-basic: 4.3.2
       qrcode: 1.5.3
     transitivePeerDependencies:
       - debug
