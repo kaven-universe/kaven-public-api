@@ -4,10 +4,10 @@
  * @website:     http://api.kaven.xyz
  * @file:        [kaven-public-api] /server.js
  * @create:      2022-06-27 14:30:57.698
- * @modify:      2024-08-28 15:34:37.195
+ * @modify:      2024-08-28 16:28:03.410
  * @version:     0.0.2
- * @times:       36
- * @lines:       136
+ * @times:       39
+ * @lines:       151
  * @copyright:   Copyright © 2022-2024 Kaven. All Rights Reserved.
  * @description: [description]
  * @license:     [license]
@@ -40,13 +40,23 @@ const KavenPacketType = {
 const server = createServer(socket => {
     const parser = new HttpRequestParser();    
     let isHttp = true;
+    let ip = socket.remoteAddress;
 
     const log = (text) => {
-        KavenLogger.Default.Info(`[${socket.remoteAddress}] ${text}`);
+        KavenLogger.Default.Info(`[${socket.remoteAddress}][${ip}] ${text}`);
     };
 
     const logError = (text) => {
-        KavenLogger.Default.Error(`[${socket.remoteAddress}] ${text}`);
+        KavenLogger.Default.Error(`[${socket.remoteAddress}][${ip}] ${text}`);
+    };
+
+    const sendSignatureOK = () => {
+        const buffer = Buffer.alloc(8);
+        buffer.writeInt32LE(8, 0);
+        buffer.writeInt32LE(KavenPacketType.SignatureOK, 4);
+        socket.write(buffer);
+
+        log("Send SignatureOK");
     };
 
     // Handle data received from the client
@@ -68,26 +78,31 @@ const server = createServer(socket => {
                         ips.push(header.Value.split(",")[0]);
                     }
 
-                    const ip = ips.find(IsPublicIP) ?? ips.find(IsPrivateIP) ?? ips.find(p => !!p) ?? "";
+                    ip = ips.find(IsPublicIP) ?? ips.find(IsPrivateIP) ?? ips.find(p => !!p) ?? "";
 
-                    const response = new HttpResponseMessage();
-                    response.StatusLine = new HttpResponseStatusLine(200);
-                    response.Body = new HttpResponseBody(Buffer.from(ip));
+                    const signatureHeader = request.Headers.find(p => IsEqual(p.Name, "Kaven-Signature", true));
+                    if (signatureHeader) {
+                        if (signatureHeader.Value !== "34548765EF51") {
+                            logError(`Invalid signature header value: ${signatureHeader.Value}`);
+                        }
 
-                    socket.end(response.ToBuffer());
+                        isHttp = false;
+                        sendSignatureOK();
+                    } else {
+                        const response = new HttpResponseMessage();
+                        response.StatusLine = new HttpResponseStatusLine(200);
+                        response.Body = new HttpResponseBody(Buffer.from(ip));
 
-                    log(`${request.StartLine.Method} ${request.StartLine.RequestTarget.OriginalUrl}, ip:${ip}`);
+                        socket.end(response.ToBuffer());
+
+                        log(`${request.StartLine.Method} ${request.StartLine.RequestTarget.OriginalUrl}, ip:${ip}`);
+                    }
                 } else {
                     isHttp = false;
                     log("HTTP parse failed");
 
                     if (data.subarray(0, signature.length).equals(signature)) {
-                        const buffer = Buffer.alloc(8);
-                        buffer.writeInt32LE(8, 0);
-                        buffer.writeInt32LE(KavenPacketType.SignatureOK, 4);
-                        socket.write(buffer);
-
-                        log("Send SignatureOK");
+                        sendSignatureOK();
                     } else {
                         log(`Unrecognized signature: ${data.join(", ")}`);
                         socket.end();
