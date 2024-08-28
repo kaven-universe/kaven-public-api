@@ -10,10 +10,10 @@
   "license": "MIT",
   "dependencies": {
     "kaven-basic": "^4.3.4",
-    "kaven-utils": "^5.4.1"
+    "kaven-utils": "^5.4.3"
   },
   "devDependencies": {
     "@wenkai.wu/eslint-config": "^1.0.7",
-    "eslint": "^8.55.0"
+    "eslint": "^8.57.0"
   }
 }
