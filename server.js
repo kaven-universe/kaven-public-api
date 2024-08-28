@@ -4,10 +4,10 @@
  * @website:     http://api.kaven.xyz
  * @file:        [kaven-public-api] /server.js
  * @create:      2022-06-27 14:30:57.698
- * @modify:      2024-08-28 13:52:46.164
+ * @modify:      2024-08-28 14:31:43.512
  * @version:     0.0.2
- * @times:       31
- * @lines:       119
+ * @times:       35
+ * @lines:       131
  * @copyright:   Copyright © 2022-2024 Kaven. All Rights Reserved.
  * @description: [description]
  * @license:     [license]
@@ -39,9 +39,15 @@ const KavenPacketType = {
 
 const server = createServer(socket => {
     const parser = new HttpRequestParser();    
-    const logs = [];
-
     let isHttp = true;
+
+    const log = (text) => {
+        KavenLogger.Default.Info(`[${socket.remoteAddress}] ${text}`);
+    };
+
+    const logError = (text) => {
+        KavenLogger.Default.Error(`[${socket.remoteAddress}] ${text}`);
+    };
 
     // Handle data received from the client
     socket.on("data", (data) => {
@@ -69,10 +75,7 @@ const server = createServer(socket => {
 
                 socket.end(response.ToBuffer());
 
-                logs.push(...[
-                    `${request.StartLine.Method} ${request.StartLine.RequestTarget.OriginalUrl}`,
-                    `ip:${ip}`,
-                ]);
+                log(`${request.StartLine.Method} ${request.StartLine.RequestTarget.OriginalUrl}, ip:${ip}`);
             } else {
                 isHttp = false;
 
@@ -81,8 +84,11 @@ const server = createServer(socket => {
                     buffer.writeInt32LE(8, 0);
                     buffer.writeInt32LE(KavenPacketType.SignatureOK, 4);
                     socket.write(buffer);
+
+                    log("Send SignatureOK");
                 } else {
-                    throw new Error();
+                    log(`Unrecognized signature: ${data.join(", ")}`);
+                    socket.end();
                 }
             }
         } else {
@@ -95,18 +101,24 @@ const server = createServer(socket => {
                 buffer.writeInt32LE(8 + ip.length, 0);
                 buffer.writeInt32LE(KavenPacketType.RequestExternalIPOK, 4);
                 socket.write(Buffer.concat([buffer, ip]));
+
+                log("Send RequestExternalIPOK");
+            } else {
+                log(`Unrecognized message type: ${type}`);
+                socket.end();
             }
         }
     });
 
     // Handle client disconnection
     socket.on("end", () => {
-        KavenLogger.Default.Info(` ${logs.join(", ")}, read:${FileSize(socket.bytesRead)},write: ${FileSize(socket.bytesWritten)}`);
+        log(`read ${FileSize(socket.bytesRead)}, write ${FileSize(socket.bytesWritten)}`);
     });
 
     // Handle errors
     socket.on("error", (err) => {
-        KavenLogger.Default.Error(`Error: ${err.message}`);
+        logError(`Error: ${err.message}`);
+        log(`read ${FileSize(socket.bytesRead)}, write ${FileSize(socket.bytesWritten)}`);
     });
 });
 
