@@ -4,9 +4,9 @@
  * @website:     http://api.kaven.xyz
  * @file:        [kaven-public-api] /server.js
  * @create:      2022-06-27 14:30:57.698
- * @modify:      2024-08-28 10:48:50.147
+ * @modify:      2024-08-28 10:54:59.039
  * @version:     0.0.2
- * @times:       21
+ * @times:       22
  * @lines:       82
  * @copyright:   Copyright © 2022-2024 Kaven. All Rights Reserved.
  * @description: [description]
@@ -77,5 +77,5 @@ const host = config.host;
 const port = config.port;
 
 server.listen(port, host, () => {
-    console.info(`server listening on http://${host}:${port}`);
+    KavenLogger.Default.Info(`server listening on http://${host}:${port}`);
 });
