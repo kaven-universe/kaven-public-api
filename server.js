@@ -4,10 +4,10 @@
  * @website:     http://api.kaven.xyz
  * @file:        [kaven-public-api] /server.js
  * @create:      2022-06-27 14:30:57.698
- * @modify:      2024-08-28 16:28:03.410
+ * @modify:      2024-08-28 17:36:04.451
  * @version:     0.0.2
- * @times:       39
- * @lines:       151
+ * @times:       44
+ * @lines:       153
  * @copyright:   Copyright © 2022-2024 Kaven. All Rights Reserved.
  * @description: [description]
  * @license:     [license]
@@ -62,6 +62,8 @@ const server = createServer(socket => {
     // Handle data received from the client
     socket.on("data", (data) => {
         try {
+            log(`data received(${data.length} bytes): ${data.subarray(0, 8).join(",")} ...`);
+
             if (isHttp) {
                 parser.Add(data);
                 const request = parser.TryGet();
@@ -104,7 +106,7 @@ const server = createServer(socket => {
                     if (data.subarray(0, signature.length).equals(signature)) {
                         sendSignatureOK();
                     } else {
-                        log(`Unrecognized signature: ${data.join(", ")}`);
+                        log("Unrecognized signature");
                         socket.end();
                     }
                 }
