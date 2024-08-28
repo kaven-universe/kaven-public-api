@@ -4,10 +4,10 @@
  * @website:     http://api.kaven.xyz
  * @file:        [kaven-public-api] /server.js
  * @create:      2022-06-27 14:30:57.698
- * @modify:      2024-08-28 10:54:59.039
+ * @modify:      2024-08-28 13:52:46.164
  * @version:     0.0.2
- * @times:       22
- * @lines:       82
+ * @times:       31
+ * @lines:       119
  * @copyright:   Copyright © 2022-2024 Kaven. All Rights Reserved.
  * @description: [description]
  * @license:     [license]
@@ -24,41 +24,78 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const config = await LoadJsonConfig(__dirname);
+const signature = Buffer.from([52, 84, 135, 101, 239, 81]);
+
+const KavenPacketType = {
+    Error : -1,
+
+    Unspecific : 0,
+
+    SignatureOK : 1,
+
+    RequestExternalIP : 101,
+    RequestExternalIPOK : 102,
+};
 
 const server = createServer(socket => {
-    const parser = new HttpRequestParser();
-
+    const parser = new HttpRequestParser();    
     const logs = [];
+
+    let isHttp = true;
 
     // Handle data received from the client
     socket.on("data", (data) => {
-        parser.Add(data);
-        const request = parser.TryGet();
-        if (request) {
-            const ips = [socket.remoteAddress];
+        if (isHttp) {
+            parser.Add(data);
+            const request = parser.TryGet();
+            if (request) {
+                const ips = [socket.remoteAddress];
 
-            let header = request.Headers.find(p => IsEqual(p.Name, "X-Real-IP", true));
-            if (header) {
-                ips.push(header.Value);
+                let header = request.Headers.find(p => IsEqual(p.Name, "X-Real-IP", true));
+                if (header) {
+                    ips.push(header.Value);
+                }
+
+                header = request.Headers.find(p => IsEqual(p.Name, HttpRequestHeader_XForwardedFor, true));
+                if (header) {
+                    ips.push(header.Value.split(",")[0]);
+                }
+
+                const ip = ips.find(IsPublicIP) ?? ips.find(IsPrivateIP) ?? ips.find(p => !!p) ?? "";
+
+                const response = new HttpResponseMessage();
+                response.StatusLine = new HttpResponseStatusLine(200);
+                response.Body = new HttpResponseBody(Buffer.from(ip));
+
+                socket.end(response.ToBuffer());
+
+                logs.push(...[
+                    `${request.StartLine.Method} ${request.StartLine.RequestTarget.OriginalUrl}`,
+                    `ip:${ip}`,
+                ]);
+            } else {
+                isHttp = false;
+
+                if (data.subarray(0, signature.length).equals(signature)) {
+                    const buffer = Buffer.alloc(8);
+                    buffer.writeInt32LE(8, 0);
+                    buffer.writeInt32LE(KavenPacketType.SignatureOK, 4);
+                    socket.write(buffer);
+                } else {
+                    throw new Error();
+                }
             }
+        } else {
+            const size = data.readInt32LE(0);
+            const type = data.readInt32LE(4);
 
-            header = request.Headers.find(p => IsEqual(p.Name, HttpRequestHeader_XForwardedFor, true));
-            if (header) {
-                ips.push(header.Value.split(",")[0]);
+            if (size === 8 && type === KavenPacketType.RequestExternalIP) {
+                const ip = Buffer.from(socket.remoteAddress, "utf-8");
+                const buffer = Buffer.alloc(8);
+                buffer.writeInt32LE(8 + ip.length, 0);
+                buffer.writeInt32LE(KavenPacketType.RequestExternalIPOK, 4);
+                socket.write(Buffer.concat([buffer, ip]));
             }
-
-            const ip = ips.find(IsPublicIP) ?? ips.find(IsPrivateIP) ?? ips.find(p => !!p) ?? "";
-
-            const response = new HttpResponseMessage();
-            response.StatusLine = new HttpResponseStatusLine(200);
-            response.Body = new HttpResponseBody(Buffer.from(ip));
-
-            socket.end(response.ToBuffer());
-
-            logs.push(...[
-                `${request.StartLine.Method} ${request.StartLine.RequestTarget.OriginalUrl}`,
-                `ip:${ip}`,
-            ]);
         }
     });
 
