@@ -1,6 +1,6 @@
 {
   "name": "kaven-public-api",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Kaven Public API",
   "main": "server.js",
   "type": "module",
@@ -9,8 +9,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "kaven-basic": "^4.3.4",
-    "kaven-utils": "^5.4.3"
+    "kaven-basic": "^4.3.5",
+    "kaven-utils": "^5.4.4"
   },
   "devDependencies": {
     "@wenkai.wu/eslint-config": "^1.0.7",

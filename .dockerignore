@@ -1,0 +1,7 @@
+.github
+.vscode
+node_modules
+.eslintrc.cjs
+.gitignore
+pnpm-lock.yaml
+README.md
