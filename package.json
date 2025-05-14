@@ -9,11 +9,11 @@
   },
   "license": "MIT",
   "dependencies": {
-    "kaven-basic": "^4.3.5",
+    "kaven-basic": "^4.4.0",
     "kaven-utils": "^5.4.4"
   },
   "devDependencies": {
-    "@wenkai.wu/eslint-config": "^1.0.7",
-    "eslint": "^8.57.0"
+    "@wenkai.wu/eslint-config": "^2.2.1",
+    "eslint": "^9.26.0"
   }
 }
