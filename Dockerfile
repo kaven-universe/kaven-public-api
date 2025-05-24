@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY . .
 
-RUN npm install --production
+RUN npm install --omit=dev
 
 LABEL name="kaven-public-api" \
     author="Kaven" \
@@ -12,5 +12,5 @@ LABEL name="kaven-public-api" \
     version="1.0.0" \
     description="A simple public http server."
 
-EXPOSE 80:80
+EXPOSE 80
 CMD [ "node", "server.js" ]
