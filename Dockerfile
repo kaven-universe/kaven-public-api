@@ -10,7 +10,7 @@ LABEL name="kaven-public-api" \
     author="Kaven" \
     email="kaven@wuwenkai.com" \
     version="1.0.0" \
-    description="A simple public http server."
+    description="Lightweight Node.js API for resolving client external IP over HTTP and Kaven protocol"
 
 EXPOSE 80
 CMD [ "node", "server.js" ]

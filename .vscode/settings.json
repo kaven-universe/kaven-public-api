@@ -2,9 +2,13 @@
     "Kaven.generateFileHeader.website": "http://api.kaven.xyz",
     "Kaven.generateFileHeader.autoGenerateWhenSave": true,
     "cSpell.words": [
-        "fastify",
         "IPOK",
         "Kaven",
+        "fastify",
+        "kavenzero",
         "wenkai"
-    ]
+    ],
+    "files.exclude": {
+        "**/node_modules": true
+    }
 }

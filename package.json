@@ -1,7 +1,7 @@
 {
   "name": "kaven-public-api",
   "version": "1.0.0",
-  "description": "Kaven Public API",
+  "description": "Lightweight Node.js API for resolving client external IP over HTTP and Kaven protocol",
   "main": "server.js",
   "type": "module",
   "scripts": {
@@ -9,11 +9,11 @@
   },
   "license": "MIT",
   "dependencies": {
-    "kaven-basic": "^6.1.0",
-    "kaven-utils": "^6.1.2"
+    "kaven-basic": "^6.1.4",
+    "kaven-utils": "^6.1.7"
   },
   "devDependencies": {
-    "@wenkai.wu/eslint-config": "^2.3.1",
-    "eslint": "^9.39.2"
+    "@wenkai.wu/eslint-config": "^2.4.1",
+    "eslint": "^10.6.0"
   }
 }
