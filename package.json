@@ -1,6 +1,6 @@
 {
   "name": "kaven-public-api",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Lightweight Node.js API for resolving client external IP over HTTP and Kaven protocol",
   "main": "server.js",
   "type": "module",
